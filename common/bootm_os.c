@@ -130,6 +130,25 @@ static int do_bootm_netbsd(int flag, int argc, char *const argv[],
 }
 #endif /* CONFIG_BOOTM_NETBSD*/
 
+#ifdef CONFIG_BOOTM_APOS
+static int do_bootm_apos(int flag, int argc, char *const argv[],
+		bootm_headers_t *images)
+{
+	void (*entry_point)(ulong initrd, void *dtb);
+
+	entry_point = (void (*)(ulong, void *))images->ep;
+
+	bootstage_mark(BOOTSTAGE_ID_RUN_OS);
+
+	printf("## Transferring control to kernel (at address %08lx) ...\n",
+			(ulong)entry_point);
+
+	(*entry_point)(images->initrd_start, images->ft_addr);
+
+	return 1;
+}
+#endif /* CONFIG_BOOTM_APOS */
+
 #ifdef CONFIG_LYNXKDI
 static int do_bootm_lynxkdi(int flag, int argc, char *const argv[],
 			    bootm_headers_t *images)
@@ -561,6 +580,9 @@ static boot_os_fn *boot_os[] = {
 #endif
 #ifdef CONFIG_BOOTM_NETBSD
 	[IH_OS_NETBSD] = do_bootm_netbsd,
+#endif
+#ifdef CONFIG_BOOTM_APOS
+	[IH_OS_APOS] = do_bootm_apos,
 #endif
 #ifdef CONFIG_LYNXKDI
 	[IH_OS_LYNXOS] = do_bootm_lynxkdi,

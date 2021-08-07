@@ -129,6 +129,7 @@ enum {
 	IH_OS_INVALID		= 0,	/* Invalid OS	*/
 	IH_OS_OPENBSD,			/* OpenBSD	*/
 	IH_OS_NETBSD,			/* NetBSD	*/
+	IH_OS_APOS,			/* APos		*/
 	IH_OS_FREEBSD,			/* FreeBSD	*/
 	IH_OS_4_4BSD,			/* 4.4BSD	*/
 	IH_OS_LINUX,			/* Linux	*/
