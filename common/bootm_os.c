@@ -134,16 +134,29 @@ static int do_bootm_netbsd(int flag, int argc, char *const argv[],
 static int do_bootm_apos(int flag, int argc, char *const argv[],
 		bootm_headers_t *images)
 {
-	void (*entry_point)(ulong initrd, void *dtb);
+	void (*entry_point)(void *dtb);
 
-	entry_point = (void (*)(ulong, void *))images->ep;
+	entry_point = (void (*)(void *))images->ep;
+	
+	struct lmb *lmb = 0;
+
+#if defined(CONFIG_LMB)
+	lmb = &images->lmb;
+#endif
+
+	if(IMAGE_ENABLE_OF_LIBFDT && images->ft_len){
+		int ret = image_setup_libfdt(images, images->ft_addr,
+				images->ft_len, lmb);
+		if(ret)
+			return ret;
+	}
 
 	bootstage_mark(BOOTSTAGE_ID_RUN_OS);
 
 	printf("## Transferring control to kernel (at address %08lx) ...\n",
 			(ulong)entry_point);
 
-	(*entry_point)(images->initrd_start, images->ft_addr);
+	(*entry_point)(images->ft_addr);
 
 	return 1;
 }
