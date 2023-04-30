@@ -130,8 +130,8 @@ static int do_bootm_netbsd(int flag, int argc, char *const argv[],
 }
 #endif /* CONFIG_BOOTM_NETBSD*/
 
-#ifdef CONFIG_BOOTM_APOS
-static int do_bootm_apos(int flag, int argc, char *const argv[],
+#ifdef CONFIG_BOOTM_KMI
+static int do_bootm_kmi(int flag, int argc, char *const argv[],
 		bootm_headers_t *images)
 {
 	void (*entry_point)(void *dtb);
@@ -160,7 +160,7 @@ static int do_bootm_apos(int flag, int argc, char *const argv[],
 
 	return 1;
 }
-#endif /* CONFIG_BOOTM_APOS */
+#endif /* CONFIG_BOOTM_KMI */
 
 #ifdef CONFIG_LYNXKDI
 static int do_bootm_lynxkdi(int flag, int argc, char *const argv[],
@@ -594,8 +594,8 @@ static boot_os_fn *boot_os[] = {
 #ifdef CONFIG_BOOTM_NETBSD
 	[IH_OS_NETBSD] = do_bootm_netbsd,
 #endif
-#ifdef CONFIG_BOOTM_APOS
-	[IH_OS_APOS] = do_bootm_apos,
+#ifdef CONFIG_BOOTM_KMI
+	[IH_OS_KMI] = do_bootm_kmi,
 #endif
 #ifdef CONFIG_LYNXKDI
 	[IH_OS_LYNXOS] = do_bootm_lynxkdi,

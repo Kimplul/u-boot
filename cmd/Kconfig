@@ -228,12 +228,12 @@ config BOOTM_NETBSD
 	help
 	  Support booting NetBSD via the bootm command.
 
-config BOOTM_APOS
-	bool "Support booting APos images"
+config BOOTM_KMI
+	bool "Support booting kmi images"
 	depends on CMD_BOOTM
 	default y
 	help
-	  Support booting APos via the bootm command.
+	  Support booting kmi via the bootm command.
 
 config BOOTM_OPENRTOS
 	bool "Support booting OPENRTOS / FreeRTOS images"

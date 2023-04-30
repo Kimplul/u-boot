@@ -76,7 +76,7 @@ typedef int64_t		Elf64_Sxword;
 #define ELFOSABI_TRU64		10	/* Compaq TRU64 UNIX */
 #define ELFOSABI_MODESTO	11	/* Novell Modesto */
 #define ELFOSABI_OPENBSD	12	/* OpenBSD */
-#define ELFOSABI_APOS		13	/* APos */
+#define ELFOSABI_KMI		13	/* kmi */
 /* 64-255 Architecture-specific value range */
 
 /* e_ident[] ABI Version */
