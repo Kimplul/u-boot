@@ -177,13 +177,11 @@
 	spi-flash@0{
 		compatible = "jedec,spi-nor";
 		reg = <0>;
-		u-boot,dm-pre-reloc;
+		bootph-all;
 	};
 };
 
 &uart0 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart0_pins>;
 	status = "okay";
 };
 

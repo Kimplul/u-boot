@@ -17,6 +17,8 @@
 		spi0 = &qspi;
 		mmc0 = &sdhci0;
 		usb0 = &usb0;
+		nvmem0 = &eeprom;
+		rtc0 = &rtc;
 	};
 
 	memory@0 {
@@ -32,14 +34,14 @@
 	gpio-keys {
 		compatible = "gpio-keys";
 		autorepeat;
-		sw14 {
+		switch-14 {
 			label = "sw14";
 			gpios = <&gpio0 12 0>;
 			linux,code = <108>; /* down */
 			wakeup-source;
 			autorepeat;
 		};
-		sw13 {
+		switch-13 {
 			label = "sw13";
 			gpios = <&gpio0 14 0>;
 			linux,code = <103>; /* up */
@@ -61,19 +63,6 @@
 	usb_phy0: phy0 {
 		compatible = "usb-nop-xceiv";
 		#phy-cells = <0>;
-	};
-};
-
-&amba {
-	ocm: sram@fffc0000 {
-		compatible = "mmio-sram";
-		reg = <0xfffc0000 0x10000>;
-		#address-cells = <1>;
-		#size-cells = <1>;
-		ranges = <0 0xfffc0000 0x10000>;
-		ocm-sram@0 {
-			reg = <0x0 0x10000>;
-		};
 	};
 };
 
@@ -155,7 +144,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <2>;
-			eeprom@54 {
+			eeprom: eeprom@54 {
 				compatible = "atmel,24c08";
 				reg = <0x54>;
 			};
@@ -177,7 +166,7 @@
 			#address-cells = <1>;
 			#size-cells = <0>;
 			reg = <4>;
-			rtc@51 {
+			rtc: rtc@51 {
 				compatible = "nxp,pcf8563";
 				reg = <0x51>;
 			};
@@ -213,7 +202,7 @@
 		conf {
 			groups = "can0_9_grp";
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 
 		conf-rx {
@@ -236,7 +225,7 @@
 		conf {
 			groups = "ethernet0_0_grp";
 			slew-rate = <0>;
-			io-standard = <4>;
+			power-source = <4>;
 		};
 
 		conf-rx {
@@ -259,7 +248,7 @@
 		conf-mdio {
 			groups = "mdio0_0_grp";
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 			bias-disable;
 		};
 	};
@@ -277,7 +266,7 @@
 				 "gpio0_10_grp", "gpio0_11_grp", "gpio0_12_grp",
 				 "gpio0_13_grp", "gpio0_14_grp";
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 
 		conf-pull-up {
@@ -301,7 +290,7 @@
 			groups = "i2c0_10_grp";
 			bias-pull-up;
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 	};
 
@@ -314,7 +303,7 @@
 		conf {
 			groups = "gpio0_50_grp", "gpio0_51_grp";
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 	};
 
@@ -327,7 +316,7 @@
 		conf {
 			groups = "sdio0_2_grp";
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 			bias-disable;
 		};
 
@@ -341,7 +330,7 @@
 			bias-high-impedance;
 			bias-pull-up;
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 
 		mux-wp {
@@ -354,7 +343,7 @@
 			bias-high-impedance;
 			bias-pull-up;
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 	};
 
@@ -367,7 +356,7 @@
 		conf {
 			groups = "uart1_10_grp";
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 
 		conf-rx {
@@ -390,7 +379,7 @@
 		conf {
 			groups = "usb0_0_grp";
 			slew-rate = <0>;
-			io-standard = <1>;
+			power-source = <1>;
 		};
 
 		conf-rx {
@@ -407,19 +396,27 @@
 };
 
 &qspi {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 	status = "okay";
+	num-cs = <1>;
+	flash@0 {
+		compatible = "n25q128a11", "jedec,spi-nor";
+		reg = <0x0>;
+		spi-tx-bus-width = <1>;
+		spi-rx-bus-width = <4>;
+		spi-max-frequency = <50000000>;
+	};
 };
 
 &sdhci0 {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_sdhci0_default>;
 };
 
 &uart1 {
-	u-boot,dm-pre-reloc;
+	bootph-all;
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&pinctrl_uart1_default>;

@@ -1,8 +1,13 @@
+config MACH_IMX
+	bool
+
 config HAS_CAAM
 	bool
 
 config IMX_CONFIG
-	string
+	string "DCD script to use"
+	depends on MACH_IMX
+	default "arch/arm/mach-imx/spl_sd.cfg"
 
 config ROM_UNIFIED_SECTIONS
 	bool
@@ -11,6 +16,9 @@ config SYSCOUNTER_TIMER
 	bool
 
 config GPT_TIMER
+	bool
+
+config MXC_GPT_HCLK
 	bool
 
 config IMX_RDC
@@ -43,7 +51,7 @@ config USE_IMXIMG_PLUGIN
 
 config IMX_HAB
 	bool "Support i.MX HAB features"
-	depends on ARCH_MX7 || ARCH_MX6 || ARCH_MX5 || ARCH_IMX8M
+	depends on ARCH_MX7 || ARCH_MX6 || ARCH_MX5 || ARCH_IMX8M || ARCH_MX7ULP
 	select FSL_CAAM if HAS_CAAM
 	imply CMD_DEKBLOB if HAS_CAAM
 	help
@@ -132,7 +140,7 @@ config CMD_NANDBCB
 
 config FSL_MFGPROT
 	bool "Support the 'mfgprot' command"
-	depends on IMX_HAB && ARCH_MX7
+	depends on IMX_HAB && (ARCH_MX7 || ARCH_IMX8M)
 	help
 	  This option enables the manufacturing protection command
 	  which can be used has a protection feature for Manufacturing
@@ -159,9 +167,14 @@ config DDRMC_VF610_CALIBRATION
 	  shall perform it on a new PCB and then use those values to program
 	  the ddrmc_cr_setting on relevant board file.
 
+config IMX8_ROMAPI
+	def_bool y
+	depends on IMX8MN || IMX8MP || IMX8ULP || IMX9
+
 config SPL_IMX_ROMAPI_LOADADDR
 	hex "Default load address to load image through ROM API"
-	depends on IMX8MN || IMX8MP || IMX8ULP
+	depends on IMX8_ROMAPI || SPL_BOOTROM_SUPPORT
+	default 0
 
 config IMX_DCD_ADDR
 	hex "DCD Blocks location on the image"
@@ -185,3 +198,9 @@ config IMX_CONTAINER_CFG
 	help
 	  This is to specific the cfg file for generating container
 	  image which will be loaded by SPL.
+
+config IOMUX_LPSR
+	bool
+
+config IOMUX_SHARE_CONF_REG
+	bool

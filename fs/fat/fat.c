@@ -275,22 +275,19 @@ get_cluster(fsdata *mydata, __u32 clustnum, __u8 *buffer, unsigned long size)
 			buffer += mydata->sect_size;
 			size -= mydata->sect_size;
 		}
-	} else {
-		__u32 idx;
+	} else if (size >= mydata->sect_size) {
+		__u32 bytes_read;
+		__u32 sect_count = size / mydata->sect_size;
 
-		idx = size / mydata->sect_size;
-		if (idx == 0)
-			ret = 0;
-		else
-			ret = disk_read(startsect, idx, buffer);
-		if (ret != idx) {
+		ret = disk_read(startsect, sect_count, buffer);
+		if (ret != sect_count) {
 			debug("Error reading data (got %d)\n", ret);
 			return -1;
 		}
-		startsect += idx;
-		idx *= mydata->sect_size;
-		buffer += idx;
-		size -= idx;
+		bytes_read = sect_count * mydata->sect_size;
+		startsect += sect_count;
+		buffer += bytes_read;
+		size -= bytes_read;
 	}
 	if (size) {
 		ALLOC_CACHE_ALIGN_BUFFER(__u8, tmpbuf, mydata->sect_size);
@@ -738,7 +735,7 @@ static int fat_itr_isdir(fat_itr *itr);
  *
  * @itr: iterator to initialize
  * @fsdata: filesystem data for the partition
- * @return 0 on success, else -errno
+ * Return: 0 on success, else -errno
  */
 static int fat_itr_root(fat_itr *itr, fsdata *fsdata)
 {
@@ -957,7 +954,7 @@ static dir_entry *extract_vfat_name(fat_itr *itr)
  * Must be called once on a new iterator before the cursor is valid.
  *
  * @itr: the iterator to iterate
- * @return boolean, 1 if success or 0 if no more entries in the
+ * Return: boolean, 1 if success or 0 if no more entries in the
  *    current directory
  */
 static int fat_itr_next(fat_itr *itr)
@@ -1027,7 +1024,7 @@ static int fat_itr_next(fat_itr *itr)
  * fat_itr_isdir() - is current cursor position pointing to a directory
  *
  * @itr: the iterator
- * @return true if cursor is at a directory
+ * Return: true if cursor is at a directory
  */
 static int fat_itr_isdir(fat_itr *itr)
 {
@@ -1055,7 +1052,7 @@ static int fat_itr_isdir(fat_itr *itr)
  * @itr: iterator initialized to root
  * @path: the requested path
  * @type: bitmask of allowable file types
- * @return 0 on success or -errno
+ * Return: 0 on success or -errno
  */
 static int fat_itr_resolve(fat_itr *itr, const char *path, unsigned type)
 {
@@ -1147,8 +1144,8 @@ int file_fat_detectfs(void)
 		return 1;
 	}
 
-	if (IS_ENABLED(CONFIG_HAVE_BLOCK_DEVICE)) {
-		printf("Interface:  %s\n", blk_get_if_type_name(cur_dev->if_type));
+	if (blk_enabled()) {
+		printf("Interface:  %s\n", blk_get_uclass_name(cur_dev->uclass_id));
 		printf("  Device %d: ", cur_dev->devnum);
 		dev_print(cur_dev);
 	}
@@ -1246,8 +1243,8 @@ out_free_itr:
 	return ret;
 }
 
-int file_fat_read_at(const char *filename, loff_t pos, void *buffer,
-		     loff_t maxsize, loff_t *actread)
+int fat_read_file(const char *filename, void *buf, loff_t offset, loff_t len,
+		  loff_t *actread)
 {
 	fsdata fsdata;
 	fat_itr *itr;
@@ -1264,12 +1261,12 @@ int file_fat_read_at(const char *filename, loff_t pos, void *buffer,
 	if (ret)
 		goto out_free_both;
 
-	debug("reading %s at pos %llu\n", filename, pos);
+	debug("reading %s at pos %llu\n", filename, offset);
 
 	/* For saving default max clustersize memory allocated to malloc pool */
 	dir_entry *dentptr = itr->dent;
 
-	ret = get_contents(&fsdata, dentptr, pos, buffer, maxsize, actread);
+	ret = get_contents(&fsdata, dentptr, offset, buf, len, actread);
 
 out_free_both:
 	free(fsdata.fatbuf);
@@ -1283,23 +1280,11 @@ int file_fat_read(const char *filename, void *buffer, int maxsize)
 	loff_t actread;
 	int ret;
 
-	ret =  file_fat_read_at(filename, 0, buffer, maxsize, &actread);
+	ret =  fat_read_file(filename, buffer, 0, maxsize, &actread);
 	if (ret)
 		return ret;
 	else
 		return actread;
-}
-
-int fat_read_file(const char *filename, void *buf, loff_t offset, loff_t len,
-		  loff_t *actread)
-{
-	int ret;
-
-	ret = file_fat_read_at(filename, offset, buf, len, actread);
-	if (ret)
-		printf("** Unable to read file %s **\n", filename);
-
-	return ret;
 }
 
 typedef struct {

@@ -40,7 +40,11 @@ source "drivers/fastboot/Kconfig"
 
 source "drivers/firmware/Kconfig"
 
+source "drivers/fuzz/Kconfig"
+
 source "drivers/fpga/Kconfig"
+
+source "drivers/fwu-mdata/Kconfig"
 
 source "drivers/gpio/Kconfig"
 
@@ -50,11 +54,15 @@ source "drivers/i2c/Kconfig"
 
 source "drivers/input/Kconfig"
 
+source "drivers/iommu/Kconfig"
+
 source "drivers/led/Kconfig"
 
 source "drivers/mailbox/Kconfig"
 
 source "drivers/memory/Kconfig"
+
+source "drivers/mfd/Kconfig"
 
 source "drivers/misc/Kconfig"
 

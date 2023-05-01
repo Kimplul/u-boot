@@ -26,7 +26,7 @@ TEE_LOAD_ADDR_LOW=`printf 0x%x $((TEE_LOAD_ADDR & 0xffffffff))`
 TEE_LOAD_ADDR_HIGH=`printf 0x%x $((TEE_LOAD_ADDR >> 32))`
 
 if [ -z "$BL33_LOAD_ADDR" ];then
-	BL33_LOAD_ADDR=`awk '/CONFIG_SYS_TEXT_BASE/ { print $3 }' include/generated/autoconf.h`
+	BL33_LOAD_ADDR=`awk '/CONFIG_TEXT_BASE/ { print $3 }' include/generated/autoconf.h`
 fi
 BL33_LOAD_ADDR_LOW=`printf 0x%x $((BL33_LOAD_ADDR & 0xffffffff))`
 BL33_LOAD_ADDR_HIGH=`printf 0x%x $((BL33_LOAD_ADDR >> 32))`
@@ -57,7 +57,7 @@ cat << __HEADER_EOF
 /dts-v1/;
 
 / {
-	description = "Configuration to load ATF before U-Boot";
+	description = "Configuration for Xilinx ZynqMP SoC";
 
 	images {
 		uboot {
@@ -78,7 +78,7 @@ __HEADER_EOF
 if [ -f $BL31 ]; then
 cat << __ATF
 		atf {
-			description = "ARM Trusted Firmware";
+			description = "Trusted Firmware-A";
 			data = /incbin/("$BL31");
 			type = "firmware";
 			os = "arm-trusted-firmware";
@@ -110,6 +110,61 @@ cat << __TEE
 		};
 __TEE
 fi
+
+MULTI_DTB=`awk '/CONFIG_MULTI_DTB_FIT / { print $3 }' include/generated/autoconf.h`
+
+if [ 1"$MULTI_DTB" -eq 11 ]; then
+	cat << __FDT_IMAGE_EOF
+		fdt_1 {
+			description = "Multi DTB fit image";
+			data = /incbin/("fit-dtb.blob");
+			type = "flat_dt";
+			arch = "arm64";
+			compression = "none";
+			$DTB_LOAD
+			hash {
+				algo = "md5";
+			};
+		};
+	};
+	configurations {
+		default = "config_1";
+__FDT_IMAGE_EOF
+
+if [ ! -f $BL31 ]; then
+cat << __CONF_SECTION1_EOF
+		config_1 {
+			description = "Multi DTB without TF-A";
+			firmware = "uboot";
+			loadables = "fdt_1";
+		};
+__CONF_SECTION1_EOF
+else
+if [ -f $BL32 ]; then
+cat << __CONF_SECTION1_EOF
+		config_1 {
+			description = "Multi DTB with TF-A and TEE";
+			firmware = "atf";
+			loadables = "uboot", "tee", "fdt_1";
+		};
+__CONF_SECTION1_EOF
+else
+cat << __CONF_SECTION1_EOF
+		config_1 {
+			description = "Multi DTB with TF-A";
+			firmware = "atf";
+			loadables = "uboot", "fdt_1";
+		};
+__CONF_SECTION1_EOF
+fi
+fi
+
+cat << __ITS_EOF
+	};
+};
+__ITS_EOF
+
+else
 
 DEFAULT=1
 cnt=1
@@ -181,3 +236,5 @@ cat << __ITS_EOF
 	};
 };
 __ITS_EOF
+
+fi

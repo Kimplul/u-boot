@@ -77,7 +77,7 @@ int checkboard(void)
 
 int board_early_init_r(void)
 {
-	const unsigned int flashbase = CONFIG_SYS_FLASH_BASE;
+	const unsigned int flashbase = CFG_SYS_FLASH_BASE;
 	int flash_esel = find_tlb_idx((void *)flashbase, 1);
 	/*
 	 * Remap Boot flash + PROMJET region to caching-inhibited
@@ -96,7 +96,7 @@ int board_early_init_r(void)
 		disable_tlb(flash_esel);
 	}
 
-	set_tlb(1, flashbase, CONFIG_SYS_FLASH_BASE_PHYS,
+	set_tlb(1, flashbase, CFG_SYS_FLASH_BASE_PHYS,
 		MAS3_SX|MAS3_SW|MAS3_SR, MAS2_I|MAS2_G,
 		0, flash_esel, BOOKE_PAGESZ_256M, 1);
 
@@ -109,16 +109,6 @@ int board_early_init_r(void)
 	return 0;
 }
 
-unsigned long get_board_sys_clk(void)
-{
-	return CONFIG_SYS_CLK_FREQ;
-}
-
-unsigned long get_board_ddr_clk(void)
-{
-	return CONFIG_DDR_CLK_FREQ;
-}
-
 int misc_init_r(void)
 {
 	u8 reg;
@@ -127,6 +117,13 @@ int misc_init_r(void)
 	reg = CPLD_READ(reset_ctl);
 	reg |= CPLD_RSTCON_EDC_RST;
 	CPLD_WRITE(reset_ctl, reg);
+
+	/* Enable POR for boards revisions D and up */
+	if (get_hw_revision() >= 'D') {
+		reg = CPLD_READ(misc_csr);
+		reg |= CPLD_MISC_POR_EN;
+		CPLD_WRITE(misc_csr, reg);
+	}
 
 	return 0;
 }
@@ -157,4 +154,24 @@ int ft_board_setup(void *blob, struct bd_info *bd)
 #endif
 
 	return 0;
+}
+
+ulong *cs4340_get_fw_addr(void)
+{
+	ulong cortina_fw_addr = CONFIG_CORTINA_FW_ADDR;
+
+#ifdef CONFIG_SYS_CORTINA_FW_IN_NOR
+	u8 reg;
+
+	reg = CPLD_READ(flash_csr);
+	if (!(reg & CPLD_BOOT_SEL)) {
+		reg = ((reg & CPLD_LBMAP_MASK) >> CPLD_LBMAP_SHIFT);
+		if (reg == 0)
+			cortina_fw_addr = CORTINA_FW_ADDR_IFCNOR;
+		else if (reg == 4)
+			cortina_fw_addr = CORTINA_FW_ADDR_IFCNOR_ALTBANK;
+	}
+#endif
+
+	return (ulong *)cortina_fw_addr;
 }

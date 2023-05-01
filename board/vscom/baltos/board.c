@@ -187,7 +187,7 @@ void am33xx_spl_board_init(void)
 	 */
 	i2c_set_bus_num(1);
 
-	printf("I2C speed: %d Hz\n", CONFIG_SYS_OMAP24_I2C_SPEED);
+	printf("I2C speed: %d Hz\n", CONFIG_SYS_I2C_SPEED);
 
 	if (i2c_probe(TPS65910_CTRL_I2C_ADDR)) {
 		puts("i2c: cannot access TPS65910\n");
@@ -266,7 +266,7 @@ int board_init(void)
 	hw_watchdog_init();
 #endif
 
-	gd->bd->bi_boot_params = CONFIG_SYS_SDRAM_BASE + 0x100;
+	gd->bd->bi_boot_params = CFG_SYS_SDRAM_BASE + 0x100;
 #if defined(CONFIG_NOR) || defined(CONFIG_MTD_RAW_NAND)
 	gpmc_init();
 #endif
