@@ -138,19 +138,19 @@ static int do_bootm_netbsd(int flag, int argc, char *const argv[],
 
 #ifdef CONFIG_BOOTM_KMI
 static int do_bootm_kmi(int flag, int argc, char *const argv[],
-		bootm_headers_t *images)
+		struct bootm_headers *images)
 {
 	void (*entry_point)(void *dtb);
 
 	entry_point = (void (*)(void *))images->ep;
-	
+
 	struct lmb *lmb = 0;
 
 #if defined(CONFIG_LMB)
 	lmb = &images->lmb;
 #endif
 
-	if(IMAGE_ENABLE_OF_LIBFDT && images->ft_len){
+	if(CONFIG_IS_ENABLED(OF_LIBFDT) && images->ft_len){
 		int ret = image_setup_libfdt(images, images->ft_addr,
 				images->ft_len, lmb);
 		if(ret)
