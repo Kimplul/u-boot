@@ -291,6 +291,7 @@ S:	Maintained
 F:	arch/arm/cpu/armv8/hisilicon
 F:	arch/arm/include/asm/arch-hi6220/
 F:	arch/arm/include/asm/arch-hi3660/
+F:	arch/arm/mach-histb
 
 ARM HPE GXP ARCHITECTURE
 M:	Jean-Marie Verdun <verdun@hpe.com>
@@ -987,10 +988,12 @@ F:	cmd/fastboot.c
 F:	doc/android/fastboot*.rst
 F:	include/fastboot.h
 F:	include/fastboot-internal.h
-F:	include/net/fastboot.h
+F:	include/net/fastboot_tcp.h
+F:	include/net/fastboot_udp.h
 F:	drivers/fastboot/
 F:	drivers/usb/gadget/f_fastboot.c
-F:	net/fastboot.c
+F:	net/fastboot_tcp.c
+F:	net/fastboot_udp.c
 F:	test/dm/fastboot.c
 
 FPGA
@@ -1493,18 +1496,16 @@ F:	configs/k2g_hs_evm_defconfig
 F:	configs/k2l_hs_evm_defconfig
 F:	configs/am65x_hs_evm_r5_defconfig
 F:	configs/am65x_hs_evm_a53_defconfig
-F:	configs/j7200_hs_evm_a72_defconfig
-F:	configs/j7200_hs_evm_r5_defconfig
 F:	configs/j721e_hs_evm_a72_defconfig
 F:	configs/j721e_hs_evm_r5_defconfig
-F:	configs/j721s2_hs_evm_a72_defconfig
-F:	configs/j721s2_hs_evm_r5_defconfig
 
 TPM DRIVERS
 M:	Ilias Apalodimas <ilias.apalodimas@linaro.org>
 S:	Maintained
 T:	git https://source.denx.de/u-boot/custodians/u-boot-tpm.git
+F:	cmd/tpm*
 F:	drivers/tpm/
+F:	include/tpm*
 
 TQ GROUP
 #M:	Martin Krause <martin.krause@tq-systems.de>
