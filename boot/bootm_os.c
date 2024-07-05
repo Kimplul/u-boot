@@ -140,9 +140,9 @@ static int do_bootm_netbsd(int flag, int argc, char *const argv[],
 static int do_bootm_kmi(int flag, int argc, char *const argv[],
 		struct bootm_headers *images)
 {
-	void (*entry_point)(void *dtb);
+	void (*entry_point)(unsigned hart, void *dtb);
 
-	entry_point = (void (*)(void *))images->ep;
+	entry_point = (void (*)(unsigned, void *))images->ep;
 
 	struct lmb *lmb = 0;
 
@@ -162,7 +162,9 @@ static int do_bootm_kmi(int flag, int argc, char *const argv[],
 	printf("## Transferring control to kernel (at address %08lx) ...\n",
 			(ulong)entry_point);
 
-	(*entry_point)(images->ft_addr);
+	/* the hart ID doesn't really matter, just make it fit with opensbi to
+	 * allow direct kernel booting in quemu */
+	(*entry_point)(0, images->ft_addr);
 
 	return 1;
 }
